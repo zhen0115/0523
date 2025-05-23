@@ -1,115 +1,74 @@
-// sketch.js
-
-let capture;
+let video;
 let facemesh;
-const width = 640;
-const height = 480;
 let predictions = [];
-
-// 第一組邊線的點的索引
-const faceOutlineIndices = [
-  409, 270, 269, 67, 0, 37, 39, 40, 185, 61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291
-];
-
-// 第二組要連接的點的索引
-const secondLineIndices = [
-  76, 77, 90, 180, 85, 16, 315, 404, 320, 307, 306, 408, 304, 303, 302, 11, 72, 73, 74, 184
-];
+const indices = [409,270,269,267,0,37,39,40,185,61,146,91,181,84,17,314,405,321,375,291];
+const indices2 = [76,77,90,180,85,16,315,404,320,307,306,408,304,303,302,11,72,73,74,184];
 
 function setup() {
-  createCanvas(width, height);
-  capture = createCapture(VIDEO);
-  capture.size(width, height);
-  capture.hide();
+  createCanvas(640, 480).position(
+    (windowWidth - 640) / 2,
+    (windowHeight - 480) / 2
+  );
+  video = createCapture(VIDEO);
+  video.size(width, height);
+  video.hide();
 
-  facemesh = ml5.facemesh(capture, modelLoaded);
-
+  facemesh = ml5.facemesh(video, modelReady);
   facemesh.on('predict', results => {
     predictions = results;
   });
 }
 
-function modelLoaded() {
-  console.log('Facemesh Model Loaded!');
+function modelReady() {
+  // 模型載入完成，可選擇顯示訊息
 }
 
 function draw() {
-  background(0);
-  image(capture, 0, 0, width, height);
-
-  // 將畫布置中
-  translate((windowWidth - width) / 2, (windowHeight - height) / 2);
-
-  drawFacemeshLines();
-  drawSecondGroupLines();
-  drawGreenBetweenGroups();
-}
-
-function drawFacemeshLines() {
-  stroke(255, 0, 0); // 紅色
-  strokeWeight(15);
-  noFill();
+  image(video, 0, 0, width, height);
 
   if (predictions.length > 0) {
     const keypoints = predictions[0].scaledMesh;
-    beginShape();
-    for (let i = 0; i < faceOutlineIndices.length; i++) {
-      const index = faceOutlineIndices[i];
-      vertex(keypoints[index][0], keypoints[index][1]);
-    }
-    endShape();
-  }
-}
 
-function drawSecondGroupLines() {
-  stroke(255, 255, 0); // 黃色
-  strokeWeight(5);
-  noFill();
-
-  if (predictions.length > 0) {
-    const keypoints = predictions[0].scaledMesh;
+    // 先畫第一組紅色線
+    stroke(255, 0, 0);
+    strokeWeight(2);
+    noFill();
     beginShape();
-    for (let i = 0; i < secondLineIndices.length; i++) {
-      const index = secondLineIndices[i];
-      vertex(keypoints[index][0], keypoints[index][1]);
+    for (let i = 0; i < indices.length; i++) {
+      const idx = indices[i];
+      const [x, y] = keypoints[idx];
+      vertex(x, y);
     }
     endShape();
 
-    // 填充第二組陣列內部的顏色
-    fill(255, 255, 0, 50); // 黃色，帶透明度
+    // 再畫第二組紅色線並填滿黃色
+    stroke(255, 0, 0);
+    strokeWeight(2);
+    fill(255, 255, 0, 200); // 半透明黃色
     beginShape();
-    for (let i = 0; i < secondLineIndices.length; i++) {
-      const index = secondLineIndices[i];
-      vertex(keypoints[index][0], keypoints[index][1]);
+    for (let i = 0; i < indices2.length; i++) {
+      const idx = indices2[i];
+      const [x, y] = keypoints[idx];
+      vertex(x, y);
     }
-    endShape(CLOSE); // 閉合形狀以填充
-  }
-}
+    endShape(CLOSE);
 
-function drawGreenBetweenGroups() {
-  stroke(0, 255, 0); // 綠色
-  strokeWeight(5);
-
-  if (predictions.length > 0) {
-    const keypoints = predictions[0].scaledMesh;
-
-    // 填充第一組和第二組之間的區域 (一種簡單的近似方法)
-    fill(0, 255, 0, 50); // 綠色，帶透明度
+    // 在第一組與第二組之間充滿綠色
+    fill(0, 255, 0, 150); // 半透明綠色
+    noStroke();
     beginShape();
-    // 添加第一組的一些點
-    for (let i = 0; i < faceOutlineIndices.length; i += Math.floor(faceOutlineIndices.length / 5)) {
-      const index = faceOutlineIndices[i];
-      vertex(keypoints[index][0], keypoints[index][1]);
+    // 先畫第一組
+    for (let i = 0; i < indices.length; i++) {
+      const idx = indices[i];
+      const [x, y] = keypoints[idx];
+      vertex(x, y);
     }
-    // 添加第二組的一些點 (反向順序連接)
-    for (let i = secondLineIndices.length - 1; i >= 0; i -= Math.floor(secondLineIndices.length / 5)) {
-      const index = secondLineIndices[i];
-      vertex(keypoints[index][0], keypoints[index][1]);
+    // 再畫第二組（反向，避免交錯）
+    for (let i = indices2.length - 1; i >= 0; i--) {
+      const idx = indices2[i];
+      const [x, y] = keypoints[idx];
+      vertex(x, y);
     }
     endShape(CLOSE);
   }
-}
-
-function windowResized() {
-  resizeCanvas(width, height);
 }
