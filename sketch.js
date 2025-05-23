@@ -25,12 +25,17 @@ function setup() {
   ];
 
   // 載入 facemesh 模型
-  ml5.facemesh(modelLoaded).then(model => {
-    facemeshModel = model;
-    facemeshModel.on('predict', results => {
-      predictions = results;
+  ml5.facemesh()
+    .then(model => {
+      facemeshModel = model;
+      facemeshModel.on('predict', results => {
+        predictions = results;
+      });
+      modelLoaded(); // 確保在模型載入後呼叫 modelLoaded
+    })
+    .catch(error => {
+      console.error("載入 facemesh 模型時發生錯誤:", error);
     });
-  });
 }
 
 function modelLoaded() {
