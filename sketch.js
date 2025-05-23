@@ -1,11 +1,16 @@
+// sketch.js
+let facemeshModel;
+let predictions = [];
+let canvasElement; // 宣告一個變數來儲存 canvas 元素
+
 function setup() {
-  // 創建一個 640x480 的畫布
-  createCanvas(640, 480);
+  // 創建一個 640x480 的畫布並將其存儲在 canvasElement 變數中
+  canvasElement = createCanvas(640, 480);
 
   // 將畫布置中在視窗中間
   let x = (windowWidth - width) / 2;
   let y = (windowHeight - height) / 2;
-  canvas.position(x, y);
+  canvasElement.position(x, y); // 現在可以正確地調用 position() 方法
 
   // 設定線條顏色為紅色
   stroke(255, 0, 0);
@@ -27,9 +32,6 @@ function setup() {
     });
   });
 }
-
-let facemeshModel;
-let predictions = [];
 
 function modelLoaded() {
   console.log('Facemesh 模型已載入！');
