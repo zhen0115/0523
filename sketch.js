@@ -42,9 +42,9 @@ function draw() {
     endShape();
 
     // 再畫第二組紅色線並填滿黃色
-    stroke(255, 0, 0);
-    strokeWeight(2);
-    fill(255, 255, 0, 200); // 半透明黃色
+    stroke(255, 50, 10);
+    strokeWeight(6);
+    fill(5, 255, 80, 20); // 半透明黃色
     beginShape();
     for (let i = 0; i < indices2.length; i++) {
       const idx = indices2[i];
@@ -54,7 +54,7 @@ function draw() {
     endShape(CLOSE);
 
     // 在第一組與第二組之間充滿綠色
-    fill(0, 255, 0, 150); // 半透明綠色
+    fill(0, 55, 100, 50); // 半透明綠色
     noStroke();
     beginShape();
     // 先畫第一組
